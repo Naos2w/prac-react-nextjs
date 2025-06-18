@@ -2,7 +2,7 @@
 import { Box, Typography } from "@mui/material";
 import styles from "../page.module.css";
 
-export const About = () => {
+const About = () => {
   return (
     <Box className={styles.page_ctn}>
       <Typography variant="h2">About Me</Typography>

@@ -10,7 +10,7 @@ type PostCardProps = {
   };
 };
 
-export const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({ post }: PostCardProps) => {
   return (
     <Box
       key={post.slug}

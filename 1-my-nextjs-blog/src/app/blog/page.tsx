@@ -3,7 +3,7 @@ import styles from "../page.module.css";
 import { getData } from "@/data/posts";
 import PostCard from "@/components/PostCard";
 
-export const Blog = async () => {
+const Blog = async () => {
   const posts = await getData();
   return (
     <Box className={styles.page_ctn}>
