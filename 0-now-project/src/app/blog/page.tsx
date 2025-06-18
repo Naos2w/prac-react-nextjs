@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import styles from "../page.module.css";
-import { getData } from "@/data/posts";
+import getData from "@/data/posts";
 import PostCard from "@/components/PostCard";
 
 const Blog = async () => {

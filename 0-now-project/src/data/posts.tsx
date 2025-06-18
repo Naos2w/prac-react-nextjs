@@ -1,6 +1,13 @@
-export const getData = async () => {
+type Post = {
+  slug: string;
+  title: string;
+  date: string;
+  content: string;
+};
+
+const getData: () => Promise<Post[]> = async () => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  const res = [];
+  const res: Post[] = [];
   const nowDate = new Date().getDate();
 
   for (let i = 1; i < 13; i++) {
