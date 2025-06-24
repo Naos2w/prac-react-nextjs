@@ -72,12 +72,13 @@ export const MessageList = () => {
                   justifyContent: "center",
                   alignItems: "center",
                   gap: 1,
+                  p: 1,
                 },
                 "& .MuiTablePagination-input": {
                   m: 0, // 原本有 32px padding
                 },
                 "& .MuiTablePagination-actions": {
-                  m: 0, // 原本有 20px padding
+                  ml: 0, // 原本有 20px padding
                 },
               }}
             />
