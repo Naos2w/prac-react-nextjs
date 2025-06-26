@@ -3,10 +3,13 @@ import { useState, useEffect } from "react";
 import { Box, Button, TextField, Typography, Link, Paper } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import ErrorMessage from "@/components/ErrorMessage";
+import { useUser } from "@/hooks/useUser";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState<string>("");
+  const { username, setUsername, login } = useUser();
+  const [userError, setUserError] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
+  const [pwdError, setPwdError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [errMsg, setErrMsg] = useState<string>("");
@@ -32,11 +35,21 @@ export default function LoginPage() {
   }, [router]);
   const handleLogin = async () => {
     setIsLoading(true);
+    if (!username) {
+      setUserError(true);
+      setIsLoading(false);
+    }
+    if (!password) {
+      setPwdError(true);
+      setIsLoading(false);
+    }
+    if (!username || !password) return;
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
+        credentials: "include",
       });
       if (!res.ok) {
         const { error } = await res.json();
@@ -45,8 +58,14 @@ export default function LoginPage() {
         return;
       }
 
-      // 登入成功，導向首頁或後台
-      router.push("/");
+      const data = await res.json();
+      if (data?.token) {
+        login(data.token);
+      }
+
+      if (username === "admin") {
+        router.push("/admin");
+      } else router.push("/");
     } catch (err) {
       setError(`Login Error: ${err}`);
     } finally {
@@ -78,7 +97,11 @@ export default function LoginPage() {
           label="Username"
           margin="normal"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => {
+            setUsername(e.target.value);
+            setUserError(false);
+          }}
+          error={userError}
         />
         <TextField
           fullWidth
@@ -86,7 +109,11 @@ export default function LoginPage() {
           type="password"
           margin="normal"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setPwdError(false);
+          }}
+          error={pwdError}
         />
         {error && (
           <Typography color="error" variant="body2" mt={1}>

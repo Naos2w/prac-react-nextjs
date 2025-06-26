@@ -35,17 +35,29 @@ export const POST = async (req: Request) => {
   }
 
   // 2. 登入成功：產生 token 或 cookie ，1小時候逾期
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
-    expiresIn: "1h",
-  });
+  const token = jwt.sign(
+    { id: user.id, username: user.username, isAdmin: user.isAdmin },
+    process.env.JWT_SECRET!,
+    {
+      expiresIn: "1h",
+    }
+  );
 
   // 3. 回傳 cookie 或 token
   const oneHour = 60 * 60;
 
-  return new Response(JSON.stringify({ message: "Login success", token }), {
-    status: 200,
-    headers: {
-      "Set-Cookie": `token=${token}; HttpOnly; Path=/; Max-Age=${oneHour}`,
-    },
-  });
+  return new Response(
+    JSON.stringify({
+      message: "Login success",
+      token,
+      exp: Math.floor(Date.now() / 1000) + 3600, // 回傳過期時間（可選）
+      userId: user.id,
+    }),
+    {
+      status: 200,
+      headers: {
+        "Set-Cookie": `token=${token}; HttpOnly; Path=/; Max-Age=${oneHour}`,
+      },
+    }
+  );
 };

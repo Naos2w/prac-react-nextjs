@@ -41,13 +41,14 @@ export const MessageForm = () => {
   return (
     <Box
       sx={{
+        width: "100%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
       }}
     >
-      <Paper sx={{ p: 4, maxWidth: 500, width: "90%", m: 2 }}>
+      <Paper sx={{ p: 4, maxWidth: 500, width: "90%", m: 1, mb: 1 }}>
         <Typography variant="h5">Message</Typography>
         <TextField
           fullWidth
@@ -58,7 +59,7 @@ export const MessageForm = () => {
             setTextError(false);
             setMessage(e.target.value);
           }}
-          sx={{ mt: 2 }}
+          sx={{ mt: 1 }}
           multiline
           rows={2}
           required

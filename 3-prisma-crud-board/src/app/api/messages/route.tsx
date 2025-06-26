@@ -108,13 +108,3 @@ export const DELETE = async (req: Request) => {
   });
   return NextResponse.json(newMessage);
 };
-
-const authenticatedChecked = async (req: Request) => {
-  const cookieHeader = req.headers.get("cookie") || "";
-  const cookies = parse(cookieHeader);
-  const token = cookies.token;
-
-  if (!token) {
-    return false;
-  }
-};

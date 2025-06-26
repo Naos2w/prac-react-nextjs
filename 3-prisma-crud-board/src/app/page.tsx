@@ -1,5 +1,6 @@
 import MessageForm from "@/components/MessageForm";
 import MessageList from "@/components/MessageList";
+import LoginStatus from "@/components/LoginStatus";
 import { MessageProvider } from "@/context/MessageContext";
 import { Box } from "@mui/material";
 import { cookies } from "next/headers";
@@ -39,6 +40,7 @@ export default async function Home() {
   return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       <MessageProvider>
+        <LoginStatus />
         <MessageForm />
         <MessageList />
       </MessageProvider>

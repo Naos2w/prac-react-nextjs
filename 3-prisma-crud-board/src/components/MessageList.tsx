@@ -37,6 +37,7 @@ export const MessageList = () => {
         sx={{
           p: 4,
           m: 2,
+          mt: 1,
           display: "flex",
           flexDirection: "column",
           gap: 2,
@@ -71,20 +72,26 @@ export const MessageList = () => {
                   flexWrap: "wrap",
                   justifyContent: "center",
                   alignItems: "center",
+                  alignContent: "center",
                   gap: 1,
-                  p: 1,
+                  p: 0,
                 },
                 "& .MuiTablePagination-input": {
                   m: 0, // 原本有 32px padding
                 },
                 "& .MuiTablePagination-actions": {
-                  ml: 0, // 原本有 20px padding
+                  ml: "0 !important", // 原本有 20px padding
                 },
               }}
             />
             {messages?.map((message: any, index: number) => (
               <Card
-                sx={{ p: 2, width: "100%", textAlign: "center" }}
+                sx={{
+                  p: 2,
+                  width: "100%",
+                  textAlign: "center",
+                  wordBreak: "break-word",
+                }}
                 key={index}
               >
                 {message.content}
