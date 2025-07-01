@@ -55,6 +55,8 @@ export const GET = async (req: Request) => {
   const userStats = messageDistribution.map((user) => ({
     username: user.username,
     messageCount: user.messages.length,
+    id: user.id,
+    color: "",
   }));
 
   return NextResponse.json({

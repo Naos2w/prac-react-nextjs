@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
+import { useAdmin } from "@/hooks/useAdmin";
 
 const COLORS = [
   "#0088FE",
@@ -24,54 +25,114 @@ const COLORS = [
 export const AdminDashboard = () => {
   const [stats, setStats] = useState<any>(null);
   const [error, setError] = useState("");
+  const { userName, setUsername, usersMap, setUsersMap } = useAdmin();
 
   useEffect(() => {
     fetch("/api/admin/stats").then(async (res) => {
       if (!res.ok) {
         setError("Failed to load admin stats");
         redirect("/login");
-        return;
       }
       const data = await res.json();
       setStats(data);
+
+      const userMaps = new Map<string, { username: string; color: string }>();
+
+      let index = 0;
+      for (const { id, username } of data.messageDistribution) {
+        const color = COLORS[index % COLORS.length];
+        if (!userMaps.has(id)) {
+          userMaps.set(id, { username, color });
+        }
+        index++;
+      }
+      for (let [key, value] of userMaps)
+        console.log(`key: ${key}, value: ${value.color}`);
+      setUsersMap(userMaps);
     });
   }, []);
 
   if (error) return <Typography color="error">{error}</Typography>;
   if (!stats) return <Typography>Loading...</Typography>;
+  const handleClickChart = (data: any) => {
+    setUsername(data.name);
+  };
 
   return (
-    <Box sx={{ p: 4, display: "grid", gap: 2 }}>
-      <Card sx={{ p: 2 }}>
+    <Box
+      sx={{
+        width: { md: "50%", xs: "none" },
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Card
+        sx={{
+          p: 2,
+          m: 2,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Typography variant="h6">Message Distribution</Typography>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={stats.messageDistribution}
-              dataKey="messageCount"
-              nameKey="username"
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              label
-            >
-              {stats.messageDistribution.map((_: any, index: any) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-        <Typography variant="body2" mt={2}>
-          Total Users : {stats.totalUsers}
-        </Typography>
-        <Typography variant="body2" mt={2}>
-          Total Messages : {stats.totalMessages}
-        </Typography>
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            minHeight: 0,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={stats.messageDistribution}
+                dataKey="messageCount"
+                nameKey="username"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label
+                onClick={handleClickChart}
+              >
+                {stats.messageDistribution.map((_: any, index: any) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { md: "row", xs: "column" },
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            sx={{ flex: 1, textAlign: "center" }}
+            variant="body2"
+            mt={1}
+          >
+            Total Users : {stats.totalUsers}
+          </Typography>
+          <Typography
+            sx={{ flex: 1, textAlign: "center" }}
+            variant="body2"
+            mt={1}
+          >
+            Total Messages : {stats.totalMessages}
+          </Typography>
+        </Box>
       </Card>
     </Box>
   );

@@ -11,12 +11,12 @@ export async function DELETE(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string; content: string } }
 ) {
   const { text } = await req.json();
   await prisma.message.update({
     where: { id: params.id },
-    data: { text },
+    data: { content: params.content },
   });
   return NextResponse.json({ message: "Updated" });
 }

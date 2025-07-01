@@ -26,8 +26,9 @@ export const GET = async (req: Request) => {
         messages: {
           select: {
             id: true,
-            text: true,
+            content: true,
             createdAt: true,
+            userId: true,
           },
         },
       },
