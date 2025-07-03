@@ -1,21 +1,26 @@
 "use client";
 import { useCallback, useContext } from "react";
-import { Message } from "@/types/message";
 import { MessageContext } from "@/context/MessageContext";
 
-export function useMessages() {
-  const { messages, setMessages } = useContext(MessageContext);
+export const useMessages = () => {
+  const { messages, setMessages, msgTotalCount, setMsgTotalCount } =
+    useContext(MessageContext);
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async (limit?: number, offset?: number) => {
     try {
-      const res = await fetch("/api/message");
-      const data: Message[] = await res.json();
-      console.log(`fetchMessages: ${data}`);
-      setMessages(data);
+      let url = "/api/messages";
+      if (limit && offset) {
+        url += `?limit=${limit}&offset=${offset}`;
+      }
+      const res = await fetch(url);
+      const data = await res.json();
+      setMessages(data.messages);
+      setMsgTotalCount(data.totalCount);
+      console.log(`totalCount: ${data.totalCount}`);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   }, []);
 
-  return { messages, fetchMessages };
-}
+  return { messages, fetchMessages, msgTotalCount };
+};
