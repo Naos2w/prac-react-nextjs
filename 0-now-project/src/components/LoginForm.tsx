@@ -4,11 +4,15 @@ import { Box, Button, TextField, Typography, Link, Paper } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import ErrorMessage from "@/components/ErrorMessage";
 import { useUser } from "@/hooks/useUser";
+import { InputAdornment, IconButton } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function LoginPage() {
   const { username, setUsername, login } = useUser();
   const [userError, setUserError] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isPwdFocused, setIsPwdFocused] = useState(false);
   const [pwdError, setPwdError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -110,7 +114,7 @@ export default function LoginPage() {
         <TextField
           fullWidth
           label="Password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           margin="normal"
           value={password}
           onChange={(e) => {
@@ -118,6 +122,25 @@ export default function LoginPage() {
             setPwdError(false);
           }}
           error={pwdError}
+          onFocus={() => setIsPwdFocused(true)}
+          onBlur={() => {
+            setIsPwdFocused(false);
+            setShowPassword(false); // 離開時強制關閉顯示
+          }}
+          InputProps={{
+            endAdornment: isPwdFocused && (
+              <InputAdornment position="end">
+                <IconButton
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  edge="end"
+                  tabIndex={-1} // 防止 tab 聚焦眼睛 icon
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         {error && (
           <Typography color="error" variant="body2" mt={1}>

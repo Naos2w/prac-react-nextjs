@@ -8,19 +8,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { useAdmin } from "@/hooks/useAdmin";
-
-const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#A28EF2",
-  "#F28EA6",
-  "#82CA9D",
-];
+import useColor from "@/hooks/useColor";
 
 export const AdminDashboard = () => {
   const {
@@ -32,28 +22,44 @@ export const AdminDashboard = () => {
     setRefreshChart,
   } = useAdmin();
 
+  const generatedColors = useMemo(() => {
+    if (!stats?.messageDistribution) return [];
+    return useColor(stats.messageDistribution.length);
+  }, [stats?.messageDistribution]);
+
   useEffect(() => {
     const fetchAndUpdate = async () => {
       const data = await fetchMessages();
       setRefreshChart(false);
-      if (!data) return;
+      // if (!data) return;
 
-      const userMaps = new Map<string, { username: string; color: string }>();
+      // const userMaps = new Map<string, { username: string; color: string }>();
 
-      let index = 0;
-      for (const { id, username } of data?.messageDistribution) {
-        const color = COLORS[index % COLORS.length];
-        if (!userMaps.has(id)) {
-          userMaps.set(id, { username, color });
-        }
-        index++;
-      }
+      // let index = 0;
+      // for (const { id, username } of data?.messageDistribution) {
+      //   const color = generatedColors[index];
+      //   if (!userMaps.has(id)) {
+      //     userMaps.set(id, { username, color });
+      //   }
+      //   index++;
+      // }
 
-      setUsersMap(userMaps);
+      // setUsersMap(userMaps);
     };
 
     fetchAndUpdate();
   }, [refreshChart]);
+
+  useEffect(() => {
+    if (!stats || generatedColors.length === 0) return;
+    const userMaps = new Map();
+    stats.messageDistribution.forEach(
+      ({ id, username }: { id: string; username: string }, i: number) => {
+        userMaps.set(id, { username, color: generatedColors[i] });
+      }
+    );
+    setUsersMap(userMaps);
+  }, [stats, generatedColors]);
 
   if (!stats) return <Typography>Loading...</Typography>;
 
@@ -102,10 +108,7 @@ export const AdminDashboard = () => {
                 onClick={handleClickChart}
               >
                 {stats.messageDistribution.map((_: any, index: any) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
+                  <Cell key={`cell-${index}`} fill={generatedColors[index]} />
                 ))}
               </Pie>
               <Tooltip />

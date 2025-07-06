@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useMessages } from "@/hooks/useMessages";
+import { LogoutFloatingButton } from "@/components/LogoutFloatingButton";
 
 export const MessageList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -32,6 +33,7 @@ export const MessageList = () => {
         alignItems: "center",
       }}
     >
+      <LogoutFloatingButton />
       {/* Message Contents */}
       <Paper
         sx={{

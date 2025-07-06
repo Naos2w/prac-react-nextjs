@@ -17,6 +17,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import type { Message } from "@/types/message";
 import { redirect } from "next/navigation";
 import PopupMessage from "./PopupMessage";
+import LogoutFloatingButton from "./LogoutFloatingButton";
 
 type User = { id: string; username: string; messages: Message[] };
 
@@ -132,6 +133,7 @@ export default function UserMessageManager() {
         height: "100vh",
       }}
     >
+      <LogoutFloatingButton />
       <Card
         sx={{
           p: 2,
@@ -139,6 +141,7 @@ export default function UserMessageManager() {
           display: "flex",
           flexDirection: "column",
           overflowY: "auto",
+          height: "100vh",
         }}
       >
         {isLoading ? <CircularProgress /> : null}
