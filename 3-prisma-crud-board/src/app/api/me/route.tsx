@@ -23,6 +23,9 @@ export const GET = async (req: Request) => {
       username: decoded.username,
     });
   } catch (err) {
-    return NextResponse.json({ isLoggedIn: false }, { status: 200 });
+    return NextResponse.json(
+      { isLoggedIn: false, error: err },
+      { status: 200 }
+    );
   }
 };

@@ -33,7 +33,6 @@ export const GET = async (req: Request) => {
     });
   }
 
-  const totalUsers = await prisma.user.count();
   const totalMessages = await prisma.message.count();
   const messageDistribution = await prisma.user.findMany({
     where: {
@@ -50,7 +49,7 @@ export const GET = async (req: Request) => {
     },
   });
 
-  const userStats = messageDistribution.map((user) => ({
+  const userStats = messageDistribution.map((user: any) => ({
     username: user.username,
     messageCount: user.messages.length,
     id: user.id,

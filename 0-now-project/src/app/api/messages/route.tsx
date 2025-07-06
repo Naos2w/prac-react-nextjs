@@ -20,7 +20,7 @@ export const GET = async (req: Request) => {
       id: string;
     };
     userId = decoded.id;
-  } catch (err) {
+  } catch {
     return new NextResponse(JSON.stringify({ error: "Invalid token" }), {
       status: 403,
     });
@@ -28,7 +28,6 @@ export const GET = async (req: Request) => {
 
   // 解析 query string
   const { searchParams } = new URL(req.url);
-  const limit = parseInt(searchParams.get("limit") || "10");
   const offset = parseInt(searchParams.get("offset") || "0");
 
   // 查詢該使用者的留言（含分頁）
@@ -62,7 +61,7 @@ export const POST = async (req: Request) => {
       id: string;
     };
     userId = decoded.id;
-  } catch (error) {
+  } catch {
     return new NextResponse(JSON.stringify({ error: "Invalid token" }), {
       status: 403,
     });

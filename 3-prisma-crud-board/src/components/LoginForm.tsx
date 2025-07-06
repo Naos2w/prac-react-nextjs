@@ -158,7 +158,7 @@ export default function LoginPage() {
           Login
         </Button>
         <Typography mt={2} textAlign="center" variant="body2">
-          Don't have an account?{" "}
+          Don\'t have an account?{" "}
           <Link href="/create-user" underline="hover">
             Create one
           </Link>

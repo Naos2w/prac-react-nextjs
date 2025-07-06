@@ -15,7 +15,7 @@ export const POST = async (req: Request) => {
 
   // 不存在則回傳錯誤
   if (!user) {
-    return new Response(JSON.stringify({ error: "User not found" }), {
+    return new NextResponse(JSON.stringify({ error: "User not found" }), {
       status: 401,
     });
   }
@@ -24,14 +24,14 @@ export const POST = async (req: Request) => {
   const isValid = user && (await bcrypt.compare(password, user.password));
 
   if (!isValid) {
-    return new Response(JSON.stringify({ error: "Invalid password" }), {
+    return new NextResponse(JSON.stringify({ error: "Invalid password" }), {
       status: 401,
     });
   }
   // 檢查 JWT_SECRET 是否存在
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    return new Response("JWT_SECRET is not defined", { status: 500 });
+    return new NextResponse("JWT_SECRET is not defined", { status: 500 });
   }
 
   // 2. 登入成功：產生 token 或 cookie ，1小時候逾期
@@ -46,7 +46,7 @@ export const POST = async (req: Request) => {
   // 3. 回傳 cookie 或 token
   const oneHour = 60 * 60;
 
-  return new Response(
+  return new NextResponse(
     JSON.stringify({
       message: "Login success",
       token,

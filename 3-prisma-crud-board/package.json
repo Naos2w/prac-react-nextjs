@@ -18,7 +18,7 @@
     "cookie": "^1.0.2",
     "dayjs": "^1.11.13",
     "jsonwebtoken": "^9.0.2",
-    "next": "15.3.4",
+    "next": "15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^3.0.0"

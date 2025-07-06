@@ -1,5 +1,5 @@
 "use client";
-import { Box, Card, Typography } from "@mui/material";
+import { Card, Typography } from "@mui/material";
 
 interface ErrorMessageProps {
   msg: string | undefined | "";

@@ -29,7 +29,7 @@ export const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchAndUpdate = async () => {
-      const data = await fetchMessages();
+      await fetchMessages();
       setRefreshChart(false);
       // if (!data) return;
 
