@@ -17,6 +17,17 @@ interface MessageDistribution {
   username: string;
   messageCount: number;
 }
+type PieChartData = {
+  id: string;
+  username: string;
+  messageCount: number;
+};
+
+type RechartsPieClickEvent = {
+  payload: PieChartData;
+  name: string;
+  value: number;
+};
 
 export const AdminDashboard = () => {
   const {
@@ -57,7 +68,7 @@ export const AdminDashboard = () => {
 
   if (!stats) return <Typography>Loading...</Typography>;
 
-  const handleClickChart = (data: any) => {
+  const handleClickChart = (data: RechartsPieClickEvent) => {
     setUsername(data.name);
   };
 

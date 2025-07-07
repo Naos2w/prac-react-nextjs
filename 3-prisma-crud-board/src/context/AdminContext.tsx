@@ -18,7 +18,7 @@ type AdminContextType = {
   setUsersMap: (
     usersMap: Map<string, { username: string; color: string }>
   ) => void;
-  stats: any;
+  stats: Stats | undefined;
   setStats: (stats: Stats) => void;
   refreshChart: boolean;
   setRefreshChart: (refreshChart: boolean) => void;
