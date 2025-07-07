@@ -77,7 +77,7 @@ export const LogoutFloatingButton = () => {
                 },
                 backgroundColor: "rgb(86, 171, 255)",
                 color: "white",
-                position: "absolute",
+                position: "fixed",
                 bottom: open ? (index + 1.5) * spacing : 0,
                 right: 10,
                 transition: "bottom 0.3s ease-out, opacity 0.3s ease-out",
