@@ -10,7 +10,13 @@ import {
 } from "recharts";
 import { useEffect, useMemo } from "react";
 import { useAdmin } from "@/hooks/useAdmin";
-import useColor from "@/hooks/useColor";
+import generateColors from "@/utils/generatedColors";
+
+interface MessageDistribution {
+  id: string;
+  username: string;
+  messageCount: number;
+}
 
 export const AdminDashboard = () => {
   const {
@@ -22,44 +28,32 @@ export const AdminDashboard = () => {
     setRefreshChart,
   } = useAdmin();
 
-  const generatedColors = useMemo(() => {
+  const generatedColors: string[] = useMemo(() => {
     if (!stats?.messageDistribution) return [];
-    return useColor(stats.messageDistribution.length);
+    return generateColors(stats.messageDistribution.length);
   }, [stats?.messageDistribution]);
 
   useEffect(() => {
     const fetchAndUpdate = async () => {
       await fetchMessages();
       setRefreshChart(false);
-      // if (!data) return;
-
-      // const userMaps = new Map<string, { username: string; color: string }>();
-
-      // let index = 0;
-      // for (const { id, username } of data?.messageDistribution) {
-      //   const color = generatedColors[index];
-      //   if (!userMaps.has(id)) {
-      //     userMaps.set(id, { username, color });
-      //   }
-      //   index++;
-      // }
-
-      // setUsersMap(userMaps);
     };
 
     fetchAndUpdate();
-  }, [refreshChart]);
+  }, [refreshChart, fetchMessages, setRefreshChart]);
 
   useEffect(() => {
     if (!stats || generatedColors.length === 0) return;
     const userMaps = new Map();
     stats.messageDistribution.forEach(
-      ({ id, username }: { id: string; username: string }, i: number) => {
+      (user: MessageDistribution, i: number) => {
+        const { id, username } = user;
         userMaps.set(id, { username, color: generatedColors[i] });
       }
     );
+
     setUsersMap(userMaps);
-  }, [stats, generatedColors]);
+  }, [stats, generatedColors, setUsersMap]);
 
   if (!stats) return <Typography>Loading...</Typography>;
 
@@ -107,9 +101,11 @@ export const AdminDashboard = () => {
                 label
                 onClick={handleClickChart}
               >
-                {stats.messageDistribution.map((_: any, index: any) => (
-                  <Cell key={`cell-${index}`} fill={generatedColors[index]} />
-                ))}
+                {stats.messageDistribution.map(
+                  (_: MessageDistribution, index: number) => (
+                    <Cell key={`cell-${index}`} fill={generatedColors[index]} />
+                  )
+                )}
               </Pie>
               <Tooltip />
               <Legend />

@@ -30,13 +30,13 @@ export default function LoginPage() {
       } else if (errorParam === "invalid_token") {
         setErrMsg("Invalid token. Please login again.");
       }
-      console.log(`errMsg: ${errMsg}`);
+      // console.log(`errMsg: ${errMsg}`);
       setTimeout(() => {
         router.replace("/login", undefined);
         setErrMsg("");
       }, 3000);
     }
-  }, [router]);
+  }, [router, searchParams]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -158,7 +158,7 @@ export default function LoginPage() {
           Login
         </Button>
         <Typography mt={2} textAlign="center" variant="body2">
-          Don\'t have an account?{" "}
+          {"Don't have an account? "}
           <Link href="/create-user" underline="hover">
             Create one
           </Link>

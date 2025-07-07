@@ -56,7 +56,7 @@ export default function UserMessageManager() {
   useEffect(() => {
     const selectedUser = messages.filter((m) => m.id === selectedUserId);
     setMsgbyUser(selectedUser);
-  }, [userName, messages]);
+  }, [userName, messages, selectedUserId]);
 
   const handleDelete = async (messageId: string) => {
     try {
@@ -80,8 +80,9 @@ export default function UserMessageManager() {
         const { error } = await res.json();
         throw new Error(error);
       }
-    } catch (err: any) {
-      setResultMsg(`Deleted failed. ${err}`);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setResultMsg(`Deleted failed. ${errorMsg}`);
       setDlgFlg(true);
     }
   };
@@ -110,8 +111,9 @@ export default function UserMessageManager() {
         const { error } = await res.json();
         throw new Error(error);
       }
-    } catch (err: any) {
-      setResultMsg(`Updated failed. ${err}`);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setResultMsg(`Updated failed. ${errorMsg}`);
       setDlgFlg(true);
       setTextErr(true);
     }

@@ -10,6 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { useMessages } from "@/hooks/useMessages";
 import { LogoutFloatingButton } from "@/components/LogoutFloatingButton";
+import type { Message } from "@/types/message";
 
 export const MessageList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -86,7 +87,7 @@ export const MessageList = () => {
                 },
               }}
             />
-            {messages?.map((message: any, index: number) => (
+            {messages?.map((message: Message, index: number) => (
               <Card
                 sx={{
                   p: 2,

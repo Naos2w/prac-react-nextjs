@@ -1,5 +1,16 @@
 "use client";
 import { useState, createContext } from "react";
+
+type Stats = {
+  totalUsers: number;
+  totalMessages: number;
+  messageDistribution: {
+    id: string;
+    username: string;
+    messageCount: number;
+  }[];
+};
+
 type AdminContextType = {
   userName: string;
   setUsername: (username: string) => void;
@@ -8,7 +19,7 @@ type AdminContextType = {
     usersMap: Map<string, { username: string; color: string }>
   ) => void;
   stats: any;
-  setStats: (stats: any) => void;
+  setStats: (stats: Stats) => void;
   refreshChart: boolean;
   setRefreshChart: (refreshChart: boolean) => void;
 };
@@ -29,7 +40,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [usersMap, setUsersMap] = useState<
     Map<string, { username: string; color: string }>
   >(new Map<string, { username: string; color: string }>());
-  const [stats, setStats] = useState<any>(undefined);
+  const [stats, setStats] = useState<Stats | undefined>(undefined);
   const [refreshChart, setRefreshChart] = useState<boolean>(false);
 
   return (

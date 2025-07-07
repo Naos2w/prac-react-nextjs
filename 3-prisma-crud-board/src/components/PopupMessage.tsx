@@ -4,7 +4,7 @@ import { TransitionProps } from "@mui/material/transitions";
 
 const BubbleTransition = forwardRef(function BubbleTransition(
   props: TransitionProps & {
-    children: ReactElement<any, any>;
+    children: ReactElement;
   },
   ref: Ref<unknown>
 ) {
@@ -34,7 +34,7 @@ export const PopupMessage = ({
       onClose();
     }, 2000);
     return () => clearTimeout(timer);
-  }, [open]);
+  }, [open, onClose]);
 
   return (
     <Dialog
