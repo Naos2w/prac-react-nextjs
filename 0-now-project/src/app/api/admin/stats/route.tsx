@@ -2,6 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { parse } from "cookie";
 import jwt from "jsonwebtoken";
+import { User, Message } from "@/generated/prisma";
+
+type UserWithMessages = User & {
+  messages: Message[];
+};
 
 export const GET = async (req: Request) => {
   const cookieHeader = req.headers.get("cookie") || "";
@@ -49,7 +54,7 @@ export const GET = async (req: Request) => {
     },
   });
 
-  const userStats = messageDistribution.map((user: any) => ({
+  const userStats = (messageDistribution as UserWithMessages[]).map((user) => ({
     username: user.username,
     messageCount: user.messages.length,
     id: user.id,
