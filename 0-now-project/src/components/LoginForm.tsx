@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Box, Button, TextField, Typography, Link, Paper } from "@mui/material";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import ErrorMessage from "@/components/ErrorMessage";
 import { useUser } from "@/hooks/useUser";
 import { InputAdornment, IconButton } from "@mui/material";
@@ -18,12 +18,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string>("");
   const [errMsg, setErrMsg] = useState<string>("");
   const router = useRouter();
-  const searchParams = useSearchParams();
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 秒 timeout
 
   useEffect(() => {
-    const errorParam = searchParams.get("err");
+    if (typeof window === "undefined") return;
+    const params = new URL(window.location.href).searchParams;
+    const errorParam = params.get("err");
+
     if (errorParam) {
       if (errorParam === "user_not_found") {
         setErrMsg("User is not found. Please login again.");
@@ -36,7 +38,7 @@ export default function LoginPage() {
         setErrMsg("");
       }, 3000);
     }
-  }, [router, searchParams]);
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

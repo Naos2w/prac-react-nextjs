@@ -1,3 +1,4 @@
+"use client";
 import AdminDashboard from "@/components/AdminDashboard";
 import UserMessageManager from "@/components/UserMessageManager";
 import { AdminProvider } from "@/context/AdminContext";

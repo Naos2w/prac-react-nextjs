@@ -28,7 +28,7 @@ export const useAdmin = () => {
       console.error("Error fetching messages:", error);
       return null;
     }
-  }, []);
+  }, [setStats]);
   return {
     userName,
     setUsername,

@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { parse } from "cookie";
 import jwt from "jsonwebtoken";
-import { User, Message } from "@/generated/prisma";
+import { User, Message } from "@prisma/client";
 
 type UserWithMessages = User & {
   messages: Message[];
