@@ -1,3 +1,35 @@
+## 🎯 專案說明
+
+本專案是一個以 Next.js（App Router 架構）為基礎，結合 Prisma ORM 與 PostgreSQL（可改 SQLite）實作的留言板管理系統。
+前台用戶可註冊、登入、發表留言，後台管理員可登入、瀏覽、編輯、刪除所有用戶留言，並支援留言統計圖表。
+專案採用 TypeScript、Material UI，並以 React hooks 管理狀態，具備良好的元件拆分與型別設計，並實作 JWT 驗證與 API 權限控管。
+
+---
+
+## 🛠️ 使用技術
+
+- **Next.js** (App Router)
+- **React** (with Hooks)
+- **TypeScript**
+- **Prisma ORM**
+- **PostgreSQL**（可改 SQLite，開發預設 PostgreSQL）
+- **Material UI**（MUI）
+- **JWT**（JSON Web Token，API 驗證）
+- **dotenv**（環境變數管理）
+
+---
+
+## 🧩 主要功能
+
+- 使用者註冊、登入、登出
+- 前台留言發表、瀏覽
+- 後台留言管理（編輯、刪除、統計圖表）
+- JWT 驗證與權限控管
+- 前端表單驗證與錯誤提示
+- 支援環境變數與安全性設計
+
+---
+
 ## 🎯 專案目標
 
 建置一個使用 Prisma + SQLite 的留言板，實作完整的 CRUD 功能，並增加簡易的使用者登入系統。透過此專案學習如何將 Next.js API Routes 與資料庫整合，讓資料持久化且更符合商業應用需求。
@@ -22,23 +54,26 @@
 ```less
 3-prisma-crud-board/
 ├── prisma/
-│   └── schema.prisma          # Prisma 資料庫 schema
+│ └── schema.prisma # Prisma 資料庫 schema
 ├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── messages/      # API Route 實作 CRUD
-│   │   │       └── route.ts
-│   │   ├── admin/             # 管理後台頁面（需登入）
-│   │   ├── login/             # 登入頁面
-│   │   └── page.tsx           # 前台留言板頁面
-│   ├── lib/
-│   │   └── prisma.ts          # Prisma client 初始化
-│   ├── middleware.ts          # JWT 認證中介層
-│   └── styles/
-│       └── globals.css
-├── .env                       # 環境變數（資料庫連線字串、JWT 秘鑰）
-├── next.config.js
-└── tsconfig.json
+│ ├── app/
+│ │ ├── api/
+│ │ │ └── messages/ # API Route 實作 CRUD
+│ │ │ └── route.ts
+│ │ ├── admin/ # 管理後台頁面（需登入）
+│ │ ├── login/ # 登入頁面
+│ │ └── page.tsx # 前台留言板頁面
+│ ├── components/ # React 元件
+│ ├── lib/
+│ │ └── prisma.ts # Prisma client 初始化
+│ ├── hooks/ # 自訂 hooks
+│ ├── middleware.ts # JWT 認證中介層
+│ └── styles/
+├── public/
+├── .env # 環境變數（資料庫連線字串、JWT 秘鑰）
+├── next.config.ts
+├── tsconfig.json
+└── README.md
 
 ```
 

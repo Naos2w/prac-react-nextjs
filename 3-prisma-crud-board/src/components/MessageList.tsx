@@ -2,10 +2,11 @@
 import {
   Box,
   Card,
-  LinearProgress,
   Paper,
   Typography,
   TablePagination,
+  Stack,
+  Skeleton,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useMessages } from "@/hooks/useMessages";
@@ -49,7 +50,31 @@ export const MessageList = () => {
         }}
       >
         {isLoading ? (
-          <LinearProgress />
+          <Stack spacing={2}>
+            <Skeleton
+              variant="text"
+              animation="wave"
+              sx={{ fontSize: "2rem" }}
+            />
+            <Skeleton
+              variant="rounded"
+              width={"100%"}
+              height={100}
+              animation="wave"
+            />
+            <Skeleton
+              variant="rounded"
+              width={"100%"}
+              height={100}
+              animation="wave"
+            />
+            <Skeleton
+              variant="rounded"
+              width={"100%"}
+              height={100}
+              animation="wave"
+            />
+          </Stack>
         ) : messages?.length === 0 ? (
           <Typography variant="h6" textAlign="center">
             No Messages
@@ -94,6 +119,7 @@ export const MessageList = () => {
                   width: "100%",
                   textAlign: "center",
                   wordBreak: "break-word",
+                  whiteSpace: "pre-wrap",
                 }}
                 key={index}
               >

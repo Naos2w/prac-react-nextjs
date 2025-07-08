@@ -1,5 +1,5 @@
 "use client";
-import { Box, Card, Typography } from "@mui/material";
+import { Box, Card, Typography, Stack, Skeleton } from "@mui/material";
 import {
   PieChart,
   Pie,
@@ -66,8 +66,6 @@ export const AdminDashboard = () => {
     setUsersMap(userMaps);
   }, [stats, generatedColors, setUsersMap]);
 
-  if (!stats) return <Typography>Loading...</Typography>;
-
   const handleClickChart = (data: RechartsPieClickEvent) => {
     setUsername(data.name);
   };
@@ -90,62 +88,120 @@ export const AdminDashboard = () => {
           flexDirection: "column",
         }}
       >
-        <Typography variant="h6">Message Distribution</Typography>
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            minHeight: 0,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={stats.messageDistribution}
-                dataKey="messageCount"
-                nameKey="username"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                label
-                onClick={handleClickChart}
+        {!stats ? (
+          <>
+            <Stack
+              direction="column"
+              spacing={2}
+              sx={{
+                flex: 1,
+                minHeight: 0,
+              }}
+            >
+              <Skeleton
+                variant="text"
+                animation="wave"
+                sx={{ fontSize: "2rem" }}
+              />
+              <Stack
+                sx={{
+                  display: "flex",
+                  height: "100%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
               >
-                {stats.messageDistribution.map(
-                  (_: MessageDistribution, index: number) => (
-                    <Cell key={`cell-${index}`} fill={generatedColors[index]} />
-                  )
-                )}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { md: "row", xs: "column" },
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Typography
-            sx={{ flex: 1, textAlign: "center" }}
-            variant="body2"
-            mt={1}
-          >
-            Total Users : {stats.totalUsers}
-          </Typography>
-          <Typography
-            sx={{ flex: 1, textAlign: "center" }}
-            variant="body2"
-            mt={1}
-          >
-            Total Messages : {stats.totalMessages}
-          </Typography>
-        </Box>
+                <Skeleton
+                  variant="circular"
+                  sx={{
+                    width: {
+                      xs: 100, // 手機
+                      sm: 150, // 平板
+                      md: 300, // 桌機
+                    },
+                    height: {
+                      xs: 100,
+                      sm: 150,
+                      md: 300,
+                    },
+                  }}
+                />
+              </Stack>
+              <Skeleton
+                variant="text"
+                animation="wave"
+                sx={{ fontSize: "1rem" }}
+              />
+              <Skeleton
+                variant="text"
+                animation="wave"
+                sx={{ fontSize: "1rem" }}
+              />
+            </Stack>
+          </>
+        ) : (
+          <>
+            <Typography variant="h6">Message Distribution</Typography>
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                minHeight: 0,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={stats.messageDistribution}
+                    dataKey="messageCount"
+                    nameKey="username"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                    onClick={handleClickChart}
+                  >
+                    {stats.messageDistribution.map(
+                      (_: MessageDistribution, index: number) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={generatedColors[index]}
+                        />
+                      )
+                    )}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { md: "row", xs: "column" },
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                sx={{ flex: 1, textAlign: "center" }}
+                variant="body2"
+                mt={1}
+              >
+                Total Users : {stats.totalUsers}
+              </Typography>
+              <Typography
+                sx={{ flex: 1, textAlign: "center" }}
+                variant="body2"
+                mt={1}
+              >
+                Total Messages : {stats.totalMessages}
+              </Typography>
+            </Box>
+          </>
+        )}
       </Card>
     </Box>
   );

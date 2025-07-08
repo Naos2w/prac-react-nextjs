@@ -8,6 +8,8 @@ import {
   IconButton,
   ButtonGroup,
   CircularProgress,
+  Stack,
+  Skeleton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -162,7 +164,44 @@ export default function UserMessageManager() {
             Please click one cell from the pie chart.
           </Typography>
         )}
-
+        {msgsbyUser.length > 0 ? (
+          <></>
+        ) : (
+          <>
+            <Stack spacing={2}>
+              <Skeleton
+                variant="rounded"
+                width={"100%"}
+                height={100}
+                animation="wave"
+              />
+              <Skeleton
+                variant="rounded"
+                width={"100%"}
+                height={100}
+                animation="wave"
+              />
+              <Skeleton
+                variant="rounded"
+                width={"100%"}
+                height={100}
+                animation="wave"
+              />
+              <Skeleton
+                variant="rounded"
+                width={"100%"}
+                height={100}
+                animation="wave"
+              />
+              <Skeleton
+                variant="rounded"
+                width={"100%"}
+                height={100}
+                animation="wave"
+              />
+            </Stack>
+          </>
+        )}
         {msgsbyUser?.map((user) =>
           user.messages.map((u) => (
             <Card key={u.id} sx={{ p: 2, mb: 1, overflow: "unset" }}>
@@ -202,7 +241,10 @@ export default function UserMessageManager() {
                   </ButtonGroup>
                 </>
               ) : (
-                <Typography sx={{ wordBreak: "break-word" }} variant="body1">
+                <Typography
+                  sx={{ wordBreak: "break-word", whiteSpace: "pre-wrap" }}
+                  variant="body1"
+                >
                   {u.content}
                 </Typography>
               )}
