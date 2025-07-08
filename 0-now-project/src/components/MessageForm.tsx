@@ -49,11 +49,10 @@ export const MessageForm = () => {
       }}
     >
       <Paper sx={{ p: 4, maxWidth: 500, width: "90%", m: 1, mb: 1 }}>
-        <Typography variant="h5">Message</Typography>
         <TextField
           fullWidth
           type="text"
-          label="Message"
+          label="Leave your message here"
           value={message}
           onChange={(e) => {
             setTextError(false);
