@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/context/UserContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -49,7 +50,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${roboto.variable}`}>
-        <UserProvider>{children}</UserProvider>
+        <ThemeProvider>
+          <UserProvider>{children}</UserProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -7,7 +7,7 @@ import {
   TextField,
   IconButton,
   ButtonGroup,
-  CircularProgress,
+  // CircularProgress,
   Stack,
   Skeleton,
 } from "@mui/material";
@@ -16,21 +16,44 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveAsIcon from "@mui/icons-material/SaveAs";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useAdmin } from "@/hooks/useAdmin";
-import type { Message } from "@/types/message";
-import { redirect } from "next/navigation";
-import PopupMessage from "./PopupMessage";
-import LogoutFloatingButton from "./LogoutFloatingButton";
+// import type { Message } from "@/types/message";
+import { useRouter } from "next/navigation";
+import PopupMessage from "@/components/PopupMessage";
+import LogoutFloatingButton from "@/components/LogoutFloatingButton";
+import LoadingScreen from "@/components/LoadingScreen";
+import { formateDate } from "@/utils/formateDate";
+import { apiRequest } from "@/utils/apiRequest";
+import { useMessages } from "@/hooks/useMessages";
 
-type User = { id: string; username: string; messages: Message[] };
+// type User = { id: string; username: string; messages: Message[] };
 
 export default function UserMessageManager() {
-  const { userName, usersMap, setRefreshChart } = useAdmin();
-  const [messages, setMessages] = useState<User[]>([]);
-  const [msgsbyUser, setMsgbyUser] = useState<User[]>([]);
-  const [resultMsg, setResultMsg] = useState<string>("");
-  const [dlgFlg, setDlgFlg] = useState<boolean>(false);
+  const {
+    userName,
+    usersMap,
+
+    stats,
+    messages,
+    changeSelectedUser,
+    fetchMessages,
+  } = useAdmin();
+  // const [messages, setMessages] = useState<User[]>([]);
+  // const [msgsbyUser, setMsgbyUser] = useState<User[]>([]);
   const [textErr, setTextErr] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [redirectAfterPopup, setRedirectAfterPopup] = useState<null | string>(
+    null
+  );
+  const router = useRouter();
+
+  const {
+    showResultMessage,
+    resultMessage,
+    resultMessageType,
+    resultMessageOpenFlag,
+    setResultMessageOpenFlag,
+    resultMessageKey,
+  } = useMessages();
 
   const users =
     usersMap &&
@@ -42,90 +65,75 @@ export default function UserMessageManager() {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editedText, setEditedText] = useState<string>("");
 
-  const fetchMessages = async () => {
-    const res = await fetch("/api/admin/messages");
-    if (!res.ok) {
-      redirect("/login");
+  const handleMessageClose = () => {
+    setResultMessageOpenFlag(false);
+    if (redirectAfterPopup) {
+      router.push(redirectAfterPopup);
+      setRedirectAfterPopup(null); // 重置狀態
     }
-    const data = await res.json();
-    setMessages(data);
   };
 
   useEffect(() => {
-    fetchMessages();
-  }, []);
+    changeSelectedUser(selectedUserId);
+  }, [stats, selectedUserId, changeSelectedUser]);
 
-  useEffect(() => {
-    const selectedUser = messages.filter((m) => m.id === selectedUserId);
-    setMsgbyUser(selectedUser);
-  }, [userName, messages, selectedUserId]);
+  const showMessage = async (
+    message: string,
+    type: "info" | "success" | "error" | "warning" | undefined
+  ) => {
+    showResultMessage(message, type);
+    if (type === "success") {
+      await fetchMessages();
+    } else if (type === "error") {
+      setTextErr(true);
+    }
+  };
+  const resetEditState = () => {
+    setEditingMessageId(null);
+    setEditedText("");
+    setTextErr(false);
+  };
 
   const handleDelete = async (messageId: string) => {
+    setIsLoading(true);
     try {
-      const res = await fetch(`/api/messages/${messageId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setResultMsg("Deleted ok.");
-        setDlgFlg(true);
-        setEditingMessageId(null);
-        setEditedText("");
-        setIsLoading(true);
-        setRefreshChart(true);
-        await fetchMessages();
-
-        setTimeout(() => {
-          setResultMsg("");
-        }, 2500);
-        setIsLoading(false);
-      } else {
-        const { error } = await res.json();
-        throw new Error(error);
-      }
+      await apiRequest(`/api/messages/${messageId}`, "DELETE");
+      await showMessage("Message deleted successfully.", "success");
+      resetEditState();
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      setResultMsg(`Deleted failed. ${errorMsg}`);
-      setDlgFlg(true);
+      if (errorMsg === "Request timed out") {
+        const msg = `Ruquest timed out. Please try again later. ${errorMsg}`;
+        showMessage(msg, "error");
+      } else {
+        const msg = `Message deleted failed. Error: ${errorMsg}`;
+        showMessage(msg, "error");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleEdit = async (messageId: string) => {
+    setIsLoading(true);
     try {
-      const res = await fetch(`/api/messages/${messageId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: editedText }),
+      await apiRequest(`/api/messages/${messageId}`, "PUT", {
+        content: editedText,
       });
-      if (res.ok) {
-        setResultMsg("Updated ok.");
-        setDlgFlg(true);
-        setEditingMessageId(null);
-        setEditedText("");
-        setIsLoading(true);
-        setRefreshChart(true);
-        await fetchMessages();
-
-        setTimeout(() => {
-          setResultMsg("");
-        }, 2500);
-        setIsLoading(false);
-      } else {
-        const { error } = await res.json();
-        throw new Error(error);
-      }
+      await showMessage("Message edited successfully.", "success");
+      resetEditState();
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      setResultMsg(`Updated failed. ${errorMsg}`);
-      setDlgFlg(true);
-      setTextErr(true);
+      if (errorMsg === "Request timed out") {
+        const msg = `Ruquest timed out. Please try again later. ${errorMsg}`;
+        showMessage(msg, "error");
+      } else {
+        const msg = `Message edited failed. Error: ${errorMsg}`;
+        showMessage(msg, "error");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  };
-  const formatDate = (d: Date) => {
-    const pad = (n: number) => n.toString().padStart(2, "0");
-
-    return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(
-      d.getDate()
-    )} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   };
 
   return (
@@ -148,12 +156,14 @@ export default function UserMessageManager() {
           height: "100vh",
         }}
       >
-        {isLoading ? <CircularProgress /> : null}
+        {isLoading ? <LoadingScreen /> : null}
+
         <PopupMessage
-          open={dlgFlg}
-          message={resultMsg}
-          type={resultMsg.includes("ok") ? "info" : "error"}
-          onClose={() => setDlgFlg(false)}
+          open={resultMessageOpenFlag}
+          message={resultMessage}
+          type={resultMessageType}
+          onClose={handleMessageClose}
+          messageKey={resultMessageKey}
         />
         {userName ? (
           <Typography variant="h6" sx={{ color: userColor }}>
@@ -164,7 +174,8 @@ export default function UserMessageManager() {
             Please click one cell from the pie chart.
           </Typography>
         )}
-        {msgsbyUser.length > 0 ? (
+        {/* {messages.length > 0 ? ( */}
+        {messages ? (
           <></>
         ) : (
           <>
@@ -202,72 +213,68 @@ export default function UserMessageManager() {
             </Stack>
           </>
         )}
-        {msgsbyUser?.map((user) =>
-          user.messages.map((u) => (
-            <Card key={u.id} sx={{ p: 2, mb: 1, overflow: "unset" }}>
-              <Typography variant="body2" sx={{ color: "gray" }}>
-                {formatDate(new Date(u.createdAt)).toLocaleString()}
-              </Typography>
-              {editingMessageId === u.id ? (
-                <>
-                  <TextField
-                    fullWidth
-                    value={editedText}
-                    multiline
-                    onChange={(e) => {
-                      setEditedText(e.target.value);
-                      setTextErr(false);
-                    }}
-                    error={textErr}
-                  />
-                  <ButtonGroup
-                    sx={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      alignItems: "center",
-                    }}
-                  >
-                    <IconButton onClick={() => handleEdit(u.id)}>
-                      <SaveAsIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => {
-                        setEditingMessageId(null);
-                        setEditedText("");
-                      }}
-                    >
-                      <CancelIcon />
-                    </IconButton>
-                  </ButtonGroup>
-                </>
-              ) : (
-                <Typography
-                  sx={{ wordBreak: "break-word", whiteSpace: "pre-wrap" }}
-                  variant="body1"
-                >
-                  {u.content}
-                </Typography>
-              )}
-              {editingMessageId === null ? (
+        {messages?.messages.map((msg) => (
+          <Card key={msg.id} sx={{ p: 2, mb: 1, overflow: "unset" }}>
+            <Typography variant="body2" sx={{ color: "gray" }}>
+              {formateDate(new Date(msg.updatedAt)).toLocaleString()}
+            </Typography>
+            {editingMessageId === msg.id ? (
+              <>
+                <TextField
+                  fullWidth
+                  value={editedText}
+                  multiline
+                  onChange={(e) => {
+                    setEditedText(e.target.value);
+                    setTextErr(false);
+                  }}
+                  error={textErr}
+                />
                 <ButtonGroup
-                  sx={{ display: "flex", justifyContent: "flex-end" }}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                  }}
                 >
+                  <IconButton onClick={() => handleEdit(msg.id)}>
+                    <SaveAsIcon />
+                  </IconButton>
                   <IconButton
                     onClick={() => {
-                      setEditingMessageId(u.id);
-                      setEditedText(u.content);
+                      setEditingMessageId(null);
+                      setEditedText("");
                     }}
                   >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(u.id)}>
-                    <DeleteIcon />
+                    <CancelIcon />
                   </IconButton>
                 </ButtonGroup>
-              ) : null}
-            </Card>
-          ))
-        )}
+              </>
+            ) : (
+              <Typography
+                sx={{ wordBreak: "break-word", whiteSpace: "pre-wrap" }}
+                variant="body1"
+              >
+                {msg.content}
+              </Typography>
+            )}
+            {editingMessageId === null ? (
+              <ButtonGroup sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <IconButton
+                  onClick={() => {
+                    setEditingMessageId(msg.id);
+                    setEditedText(msg.content);
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={() => handleDelete(msg.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </ButtonGroup>
+            ) : null}
+          </Card>
+        ))}
       </Card>
     </Box>
   );

@@ -2,24 +2,31 @@
 import { useState, useEffect } from "react";
 import { Box, Button, TextField, Typography, Link, Paper } from "@mui/material";
 import { useRouter } from "next/navigation";
-import ErrorMessage from "@/components/ErrorMessage";
 import { useUser } from "@/hooks/useUser";
-import { InputAdornment, IconButton } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { apiRequest } from "@/utils/apiRequest";
+import { useMessages } from "@/hooks/useMessages";
+import { PopupMessage } from "@/components/PopupMessage";
 
 export default function LoginPage() {
   const { username, setUsername, login } = useUser();
   const [userError, setUserError] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isPwdFocused, setIsPwdFocused] = useState(false);
   const [pwdError, setPwdError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [errMsg, setErrMsg] = useState<string>("");
+  const [redirectAfterPopup, setRedirectAfterPopup] = useState<null | string>(
+    null
+  );
+
   const router = useRouter();
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 秒 timeout
+
+  const {
+    showResultMessage,
+    resultMessage,
+    resultMessageType,
+    resultMessageOpenFlag,
+    setResultMessageOpenFlag,
+  } = useMessages();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -28,20 +35,38 @@ export default function LoginPage() {
 
     if (errorParam) {
       if (errorParam === "user_not_found") {
-        setErrMsg("User is not found. Please login again.");
+        const msg = "User is not found. Please login again.";
+        setError("User is not found. Please login again.");
+        showMessage(msg, "error");
       } else if (errorParam === "invalid_token") {
-        setErrMsg("Invalid token. Please login again.");
+        const msg = "Invalid token. Please login again.";
+        setError(msg);
+        showMessage(msg, "error");
       }
-      // console.log(`errMsg: ${errMsg}`);
-      setTimeout(() => {
-        router.replace("/login", undefined);
-        setErrMsg("");
-      }, 3000);
     }
   }, [router]);
 
+  const showMessage = async (
+    message: string,
+    type: "info" | "success" | "error" | "warning" | undefined
+  ) => {
+    showResultMessage(message, type);
+    if (type === "success") {
+      if (username === "admin") {
+        setRedirectAfterPopup("/admin");
+      } else setRedirectAfterPopup("/");
+    }
+  };
+  const handleMessageClose = () => {
+    setResultMessageOpenFlag(false);
+    if (redirectAfterPopup) {
+      router.push(redirectAfterPopup);
+      setRedirectAfterPopup(null); // 重置狀態
+    }
+  };
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
     if (!username) {
       setUserError(true);
@@ -53,32 +78,28 @@ export default function LoginPage() {
     }
     if (!username || !password) return;
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-        credentials: "include",
+      const data = await apiRequest<{ token: string }>("/api/login", "POST", {
+        username: username.toLowerCase(),
+        password,
       });
-      if (!res.ok) {
-        const { error } = await res.json();
-        setError(error || "Login failed");
-        setIsLoading(false);
-        return;
-      }
 
-      const data = await res.json();
       if (data?.token) {
         login(data.token);
       }
-
-      if (username === "admin") {
-        router.push("/admin");
-      } else router.push("/");
-    } catch (err) {
-      setError(`Login Error: ${err}`);
+      await showMessage("Login Successfully. Redirecting ...", "success");
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      if (errorMsg === "Request timed out") {
+        const msg = `Ruquest timed out. Please try again later. ${errorMsg}`;
+        showMessage(msg, "error");
+        setError(msg);
+      } else {
+        const msg = `Login failed. Error: ${errorMsg}`;
+        showMessage(msg, "error");
+        setError(msg);
+      }
     } finally {
       setIsLoading(false);
-      clearTimeout(timeoutId);
     }
   };
 
@@ -94,7 +115,13 @@ export default function LoginPage() {
       }}
       onSubmit={handleLogin}
     >
-      {errMsg && <ErrorMessage msg={errMsg} />}
+      <PopupMessage
+        open={resultMessageOpenFlag}
+        message={resultMessage}
+        type={resultMessageType}
+        onClose={handleMessageClose}
+        duration={2000}
+      />
       <Paper
         elevation={3}
         sx={{ padding: 4, maxWidth: 500, width: "90%", m: 2 }}
@@ -116,7 +143,7 @@ export default function LoginPage() {
         <TextField
           fullWidth
           label="Password"
-          type={showPassword ? "text" : "password"}
+          type="password"
           margin="normal"
           value={password}
           onChange={(e) => {
@@ -124,25 +151,6 @@ export default function LoginPage() {
             setPwdError(false);
           }}
           error={pwdError}
-          onFocus={() => setIsPwdFocused(true)}
-          onBlur={() => {
-            setIsPwdFocused(false);
-            setShowPassword(false); // 離開時強制關閉顯示
-          }}
-          InputProps={{
-            endAdornment: isPwdFocused && (
-              <InputAdornment position="end">
-                <IconButton
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  edge="end"
-                  tabIndex={-1} // 防止 tab 聚焦眼睛 icon
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
         />
         {error && (
           <Typography color="error" variant="body2" mt={1}>
@@ -153,7 +161,6 @@ export default function LoginPage() {
           fullWidth
           variant="contained"
           sx={{ mt: 2 }}
-          // onClick={handleLogin}
           loading={isLoading}
           type="submit"
         >

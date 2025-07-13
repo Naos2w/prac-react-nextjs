@@ -9,20 +9,47 @@ import {
   ButtonGroup,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { apiRequest } from "@/utils/apiRequest";
+import { useMessages } from "@/hooks/useMessages";
+import { PopupMessage } from "@/components/PopupMessage";
 
 export const CreateUserForm = () => {
   const [username, setUsername] = useState<string>("");
   const [userError, setUserError] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
   const [pwdError, setPwdError] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [redirectAfterPopup, setRedirectAfterPopup] = useState<null | string>(
+    null
+  );
   const router = useRouter();
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 秒 timeout
 
-  const handleCreateUser = async () => {
+  const {
+    showResultMessage,
+    resultMessage,
+    resultMessageType,
+    resultMessageOpenFlag,
+    setResultMessageOpenFlag,
+  } = useMessages();
+
+  const showMessage = async (
+    message: string,
+    type: "info" | "success" | "error" | "warning" | undefined
+  ) => {
+    showResultMessage(message, type);
+    if (type === "success") setRedirectAfterPopup("/login");
+  };
+  const handleMessageClose = () => {
+    setResultMessageOpenFlag(false);
+    if (redirectAfterPopup) {
+      router.push(redirectAfterPopup);
+      setRedirectAfterPopup(null); // 重置狀態
+    }
+  };
+  const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
     setIsLoading(true);
     if (!username) {
       setUserError(true);
@@ -35,37 +62,51 @@ export const CreateUserForm = () => {
     if (!username || !password) return;
 
     try {
-      const res = await fetch("/api/user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+      await apiRequest<{ token: string }>("/api/user", "POST", {
+        username: username.toLowerCase(),
+        password,
       });
-      if (!res.ok) {
-        const { error } = await res.json();
-        setError(error || "Failed to create user");
-        return;
+
+      await showMessage(
+        "Create Successfully. Redirecting to login page ...",
+        "success"
+      );
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      if (errorMsg === "Request timed out") {
+        const msg = `Ruquest timed out. Please try again later. ${errorMsg}`;
+        showMessage(msg, "error");
+        setError(msg);
+      } else {
+        const msg = `Created user failed. Error: ${errorMsg}`;
+        showMessage(msg, "error");
+        setError(msg);
       }
-      setMessage("User created! Redirecting to login...");
-      setTimeout(() => router.push("/login"), 1500);
-    } catch (err) {
-      setError(`Create user error: ${err}`);
     } finally {
       setIsLoading(false);
-      clearTimeout(timeoutId);
     }
   };
   const handleBackToLogin = () => {
     router.push("/login");
   };
+
   return (
     <Box
+      component={"form"}
       sx={{
         height: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
       }}
+      onSubmit={handleCreateUser}
     >
+      <PopupMessage
+        open={resultMessageOpenFlag}
+        message={resultMessage}
+        type={resultMessageType}
+        onClose={handleMessageClose}
+      />
       <Paper
         elevation={3}
         sx={{ padding: 4, maxWidth: 500, width: "90%", m: 2 }}
@@ -103,11 +144,6 @@ export const CreateUserForm = () => {
             {error}
           </Typography>
         )}
-        {message && (
-          <Typography color="primary" variant="body2" mt={1}>
-            {message}
-          </Typography>
-        )}
         <ButtonGroup
           fullWidth
           sx={{
@@ -117,11 +153,7 @@ export const CreateUserForm = () => {
             gap: 2,
           }}
         >
-          <Button
-            variant="contained"
-            onClick={handleCreateUser}
-            loading={isLoading}
-          >
+          <Button variant="contained" loading={isLoading} type="submit">
             Register
           </Button>
           <Button variant="contained" onClick={handleBackToLogin}>

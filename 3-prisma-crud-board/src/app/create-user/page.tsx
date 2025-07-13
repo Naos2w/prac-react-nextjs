@@ -1,6 +1,11 @@
 "use client";
 import CreateUserForm from "@/components/CreateUserForm";
+import { MessageProvider } from "@/context/MessageContext";
 
 export default function CreateUserPage() {
-  return <CreateUserForm />;
+  return (
+    <MessageProvider>
+      <CreateUserForm />
+    </MessageProvider>
+  );
 }

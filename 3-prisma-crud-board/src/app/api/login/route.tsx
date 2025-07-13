@@ -7,10 +7,10 @@ import jwt from "jsonwebtoken";
 export const POST = async (req: Request) => {
   const body = await req.json();
   const { username, password } = body;
-
+  console.log(`username: ${username}, password: ${password}`);
   // 1. 檢查使用者是否存在
   const user = await prisma.user.findUnique({
-    where: { username },
+    where: { username: username },
   });
 
   // 不存在則回傳錯誤

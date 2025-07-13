@@ -33,7 +33,7 @@ export const GET = async (req: Request) => {
   // 查詢該使用者的留言（含分頁）
   const messages = await prisma.message.findMany({
     where: { userId },
-    orderBy: { createdAt: "desc" },
+    orderBy: { updatedAt: "desc" },
     skip: offset, // 從第幾筆開始
     // take: limit, // 要幾筆資料
   });
@@ -70,7 +70,8 @@ export const POST = async (req: Request) => {
   // 3. 取得留言內容
   const body = await req.json();
   const content = body.message?.trim();
-
+  console.log(`body: ${Object.keys(body)}`);
+  console.log(`body: ${body.message}`);
   if (!content) {
     return new NextResponse(JSON.stringify({ error: "message is required" }), {
       status: 400,

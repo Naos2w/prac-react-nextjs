@@ -3,8 +3,20 @@ import { useCallback, useContext } from "react";
 import { MessageContext } from "@/context/MessageContext";
 
 export const useMessages = () => {
-  const { messages, setMessages, msgTotalCount, setMsgTotalCount } =
-    useContext(MessageContext);
+  const {
+    messages,
+    setMessages,
+    msgTotalCount,
+    setMsgTotalCount,
+    resultMessage,
+    setResultMessage,
+    resultMessageType,
+    setResultMessageType,
+    resultMessageOpenFlag,
+    setResultMessageOpenFlag,
+    resultMessageKey,
+    setResultMessageKey,
+  } = useContext(MessageContext);
 
   const fetchMessages = useCallback(
     async (limit?: number, offset?: number) => {
@@ -25,5 +37,28 @@ export const useMessages = () => {
     [setMessages, setMsgTotalCount]
   );
 
-  return { messages, fetchMessages, msgTotalCount };
+  const showResultMessage = useCallback(
+    (
+      message: string,
+      type: "success" | "error" | "info" | "warning" = "info"
+    ) => {
+      setResultMessage(message);
+      setResultMessageType(type);
+      setResultMessageOpenFlag(true);
+      setResultMessageKey(Date.now());
+    },
+    [setResultMessage, setResultMessageType, setResultMessageOpenFlag]
+  );
+
+  return {
+    messages,
+    fetchMessages,
+    msgTotalCount,
+    resultMessage,
+    resultMessageType,
+    resultMessageOpenFlag,
+    showResultMessage,
+    setResultMessageOpenFlag,
+    resultMessageKey,
+  };
 };

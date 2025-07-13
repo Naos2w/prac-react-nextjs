@@ -1,20 +1,41 @@
 "use client";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AddIcon from "@mui/icons-material/Add";
 import PermContactCalendarIcon from "@mui/icons-material/PermContactCalendar";
 import { Fab, Tooltip, Zoom } from "@mui/material";
 import { redirect } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { ThemeContext } from "@/context/ThemeContext";
 
 export const LogoutFloatingButton = () => {
   const { username } = useUser();
+  const { theme, toggleTheme } = useContext(ThemeContext);
+
   const [open, setOpen] = useState(false);
   const handleToggle = () => {
     setOpen((prev) => !prev);
   };
 
   const spacing = 55;
+
+  const getFabColor = (name: string, theme: string) => {
+    if (name === "Theme Toggle") {
+      return theme === "dark" ? "rgb(199, 179, 0)" : "rgb(2, 71, 139)";
+    }
+    if (name === "Logout") return "#f44336";
+    return "grey.500";
+  };
+
+  const getFabHoverColor = (name: string, theme: string) => {
+    if (name === "Theme Toggle") {
+      return theme === "dark" ? "rgb(245, 220, 0)" : "rgb(0, 106, 212)";
+    }
+    if (name === "Logout") return "#d32f2f";
+    return "grey.600";
+  };
 
   const handleLogout = async () => {
     await fetch("/api/logout", { method: "POST" });
@@ -28,6 +49,12 @@ export const LogoutFloatingButton = () => {
             name: "Logout",
             description: "Logout",
             onClick: handleLogout,
+          },
+          {
+            icon: theme === "dark" ? <LightModeIcon /> : <DarkModeIcon />,
+            name: "Theme Toggle",
+            description: "Theme Toggle",
+            onClick: toggleTheme,
           },
         ]
       : [
@@ -43,6 +70,12 @@ export const LogoutFloatingButton = () => {
             description: `Login user: ${username}`,
             onClick: () => {},
           },
+          {
+            icon: theme === "dark" ? <LightModeIcon /> : <DarkModeIcon />,
+            name: "Theme Toggle",
+            description: "Theme Toggle",
+            onClick: toggleTheme,
+          },
         ];
 
   return (
@@ -51,7 +84,7 @@ export const LogoutFloatingButton = () => {
         sx={{
           position: "fixed",
           bottom: 10,
-          right: 10,
+          right: 20,
           transform: `rotate(${open ? 135 : 0}deg)`,
           transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
         }}
@@ -72,14 +105,14 @@ export const LogoutFloatingButton = () => {
               aria-label={action.name}
               onClick={action.onClick}
               sx={{
+                backgroundColor: getFabColor(action.name, theme),
                 "&:hover": {
-                  backgroundColor: "rgb(158, 207, 255)",
+                  backgroundColor: getFabHoverColor(action.name, theme),
                 },
-                backgroundColor: "rgb(86, 171, 255)",
                 color: "white",
                 position: "fixed",
                 bottom: open ? (index + 1.5) * spacing : 0,
-                right: 10,
+                right: 25,
                 transition: "bottom 0.3s ease-out, opacity 0.3s ease-out",
                 opacity: open ? 1 : 0,
                 pointerEvents: open ? "auto" : "none",

@@ -1,5 +1,13 @@
 "use client";
-import { Box, Card, Typography, Stack, Skeleton } from "@mui/material";
+import {
+  Box,
+  Card,
+  Typography,
+  Stack,
+  Skeleton,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import {
   PieChart,
   Pie,
@@ -8,9 +16,11 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAdmin } from "@/hooks/useAdmin";
 import generateColors from "@/utils/generatedColors";
+import { useMessages } from "@/hooks/useMessages";
+import { useRouter } from "next/navigation";
 
 interface MessageDistribution {
   id: string;
@@ -39,19 +49,68 @@ export const AdminDashboard = () => {
     setRefreshChart,
   } = useAdmin();
 
+  const { showResultMessage, resultMessageOpenFlag } = useMessages();
+  const [redirectAfterPopup, setRedirectAfterPopup] = useState<null | string>(
+    null
+  );
+  const router = useRouter();
+
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
+  const isSm = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const maxLabelLength = isXs ? 6 : isSm ? 10 : 15;
+  const truncateLabel = (label: string) => {
+    return label.length > maxLabelLength
+      ? `${label.slice(0, maxLabelLength)}...`
+      : label;
+  };
+
   const generatedColors: string[] = useMemo(() => {
     if (!stats?.messageDistribution) return [];
     return generateColors(stats.messageDistribution.length);
   }, [stats?.messageDistribution]);
 
+  const RedirectToLogin = (redirectFlag: boolean | undefined) => {
+    if (!resultMessageOpenFlag && redirectFlag) setRedirectAfterPopup("/login");
+  };
+
+  const showMessage = async (
+    message: string,
+    type: "info" | "success" | "error" | "warning" | undefined,
+    redirectFlag?: boolean
+  ) => {
+    showResultMessage(message, type);
+    RedirectToLogin(redirectFlag);
+  };
+
+  useEffect(() => {
+    if (!resultMessageOpenFlag) {
+      if (redirectAfterPopup) {
+        router.push(redirectAfterPopup);
+        setRedirectAfterPopup(null);
+      }
+    }
+  }, [resultMessageOpenFlag, redirectAfterPopup, setRedirectAfterPopup]);
+
   useEffect(() => {
     const fetchAndUpdate = async () => {
-      await fetchMessages();
+      console.log(`fetchAndUpdate`);
+      try {
+        await fetchMessages();
+      } catch (err: unknown) {
+        const { error, redirectFlag } = err as {
+          error: string;
+          redirectFlag: boolean;
+        };
+        showMessage(error, "error", redirectFlag);
+      }
+
       setRefreshChart(false);
     };
 
     fetchAndUpdate();
-  }, [refreshChart, fetchMessages, setRefreshChart]);
+    console.log(`refreshChart: ${refreshChart}`);
+  }, [fetchMessages, setRefreshChart]);
 
   useEffect(() => {
     if (!stats || generatedColors.length === 0) return;
@@ -159,8 +218,8 @@ export const AdminDashboard = () => {
                     nameKey="username"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
-                    label
+                    outerRadius="80%"
+                    label={({ name }) => truncateLabel(name)}
                     onClick={handleClickChart}
                   >
                     {stats.messageDistribution.map(
@@ -172,8 +231,13 @@ export const AdminDashboard = () => {
                       )
                     )}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip
+                    formatter={(value, _, props) => [
+                      value,
+                      props.payload.username,
+                    ]}
+                  />
+                  <Legend formatter={(value: string) => truncateLabel(value)} />
                 </PieChart>
               </ResponsiveContainer>
             </Box>

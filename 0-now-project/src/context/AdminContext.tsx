@@ -1,15 +1,6 @@
 "use client";
 import { useState, createContext } from "react";
-
-type Stats = {
-  totalUsers: number;
-  totalMessages: number;
-  messageDistribution: {
-    id: string;
-    username: string;
-    messageCount: number;
-  }[];
-};
+import type { Stats, UserWithMessagesType } from "@/types/message";
 
 type AdminContextType = {
   userName: string;
@@ -22,6 +13,10 @@ type AdminContextType = {
   setStats: (stats: Stats) => void;
   refreshChart: boolean;
   setRefreshChart: (refreshChart: boolean) => void;
+  messages: UserWithMessagesType | undefined;
+  setMessages: (messages: UserWithMessagesType) => void;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
 };
 
 export const AdminContext = createContext<AdminContextType>({
@@ -33,6 +28,10 @@ export const AdminContext = createContext<AdminContextType>({
   setStats: () => {},
   refreshChart: false,
   setRefreshChart: () => {},
+  messages: undefined,
+  setMessages: () => {},
+  isLoading: false,
+  setIsLoading: () => {},
 });
 
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
@@ -42,6 +41,10 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
   >(new Map<string, { username: string; color: string }>());
   const [stats, setStats] = useState<Stats | undefined>(undefined);
   const [refreshChart, setRefreshChart] = useState<boolean>(false);
+  const [messages, setMessages] = useState<UserWithMessagesType | undefined>(
+    undefined
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   return (
     <AdminContext.Provider
@@ -54,6 +57,10 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
         setStats,
         refreshChart,
         setRefreshChart,
+        messages,
+        setMessages,
+        isLoading,
+        setIsLoading,
       }}
     >
       {children}
